@@ -47,7 +47,8 @@ Guide to show the steps required to use NBDE (network bound disk encryption) to 
    ```
 6. update your initramdisk to include networking and the newly installed clevis pin.
    ```
-   yum install clevis-dracut
+   sudo su
+   dnf install clevis-dracut
    echo "hostonly_cmdline=yes" > /etc/dracut.conf.d/clevis.conf
    dracut -fv --regenerate-all
    ```
