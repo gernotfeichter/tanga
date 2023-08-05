@@ -5,6 +5,9 @@ Guide to show the steps required to use NBDE (network bound disk encryption) to 
 
 > This guide is written for a Fedora linux machine. To use it on distributions systems, you will need to translate package manger/initial ram disk commands etc. to your target linux distribution! It will NOT be easy for the non-tech-affine, but it should be technically possible to run it on any linux distribution!
 
+> Warning: This is an early draft. Main pain points:
+> - after reboot of android, the Userland app needs to be re-opened manually AND
+> the tang command needs to be started
 # setup
 
 ## android
