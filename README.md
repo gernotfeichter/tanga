@@ -51,6 +51,9 @@ Guide to show the steps required to use NBDE (network bound disk encryption) to 
    echo "hostonly_cmdline=yes" > /etc/dracut.conf.d/clevis.conf
    dracut -fv --regenerate-all
    ```
+   > NOTE: While I mentioned WIFI in the intro, my linux machine needs to be connected via cable, since dracut seems to not support WIFI!
+   > Luckily, at least the android phone can be on WIFI (on the same network/router).
+   > Still, I'm looking forward to try other initrd management systems than dracut to get rid of this limitation!
 7. reboot and hopefully your disk gets unlocked (at least after pressing enter on the plyouth screen without pasword)
 8. You might want to get rid of plymouth to avoid even pressing enter!
 
