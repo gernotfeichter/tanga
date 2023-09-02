@@ -5,7 +5,7 @@ import 'dart:io' show Directory;
 import 'dart:ffi' as ffi;
 
 Future<int> main(List<String> args) {
-  
+
   var libraryPath = path.join(Directory.current.path, 'src', 'build', 'cmd', 'libjose.so');
 
   final dynlib = ffi.DynamicLibrary.open(libraryPath);
@@ -26,5 +26,5 @@ Future<int> main(List<String> args) {
   }
 
   // Call the C function.
-  return nativeLib.main(utf8Ptrs.length, argsCStringArray);
+  return Future.value(nativeLib.main(utf8Ptrs.length, argsCStringArray));
 }

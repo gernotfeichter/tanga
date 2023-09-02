@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -15,13 +17,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late int sumResult;
-  late Future<int> exit_code;
+  late Future<int> exitCode;
 
   @override
-  void initState() {
+  void initState() async {
     super.initState();
-    exit_code = jose_ffi.main(['--help']);
+    exitCode = jose_ffi.main(['--help']);
   }
 
   @override
@@ -46,7 +47,7 @@ class _MyAppState extends State<MyApp> {
                 ),
                 spacerSmall,
                 FutureBuilder<int>(
-                  future: sumAsyncResult,
+                  future: exitCode,
                   builder: (BuildContext context, AsyncSnapshot<int> value) {
                     final displayValue =
                         (value.hasData) ? value.data : 'loading';
