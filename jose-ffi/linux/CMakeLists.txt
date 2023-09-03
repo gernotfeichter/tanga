@@ -1,10 +1,12 @@
 # The Flutter tooling requires that developers have CMake 3.10 or later
 # installed. You should not increase this version, as doing so will cause
 # the plugin to fail to compile for some customers of the plugin.
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 
 # Project-level configuration.
 set(PROJECT_NAME "jose_ffi")
+set(CMAKE_POLICY_DEFAULT_CMP0079 NEW)
+
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 # Invoke the build for native code shared with the other target platforms.

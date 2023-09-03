@@ -1,0 +1,43 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/cmd.dir/alg.c.o"
+  "CMakeFiles/cmd.dir/alg.c.o.d"
+  "CMakeFiles/cmd.dir/b64/dec.c.o"
+  "CMakeFiles/cmd.dir/b64/dec.c.o.d"
+  "CMakeFiles/cmd.dir/b64/enc.c.o"
+  "CMakeFiles/cmd.dir/b64/enc.c.o.d"
+  "CMakeFiles/cmd.dir/fmt.c.o"
+  "CMakeFiles/cmd.dir/fmt.c.o.d"
+  "CMakeFiles/cmd.dir/jose.c.o"
+  "CMakeFiles/cmd.dir/jose.c.o.d"
+  "CMakeFiles/cmd.dir/jwe/dec.c.o"
+  "CMakeFiles/cmd.dir/jwe/dec.c.o.d"
+  "CMakeFiles/cmd.dir/jwe/enc.c.o"
+  "CMakeFiles/cmd.dir/jwe/enc.c.o.d"
+  "CMakeFiles/cmd.dir/jwe/fmt.c.o"
+  "CMakeFiles/cmd.dir/jwe/fmt.c.o.d"
+  "CMakeFiles/cmd.dir/jwk/eql.c.o"
+  "CMakeFiles/cmd.dir/jwk/eql.c.o.d"
+  "CMakeFiles/cmd.dir/jwk/exc.c.o"
+  "CMakeFiles/cmd.dir/jwk/exc.c.o.d"
+  "CMakeFiles/cmd.dir/jwk/gen.c.o"
+  "CMakeFiles/cmd.dir/jwk/gen.c.o.d"
+  "CMakeFiles/cmd.dir/jwk/pub.c.o"
+  "CMakeFiles/cmd.dir/jwk/pub.c.o.d"
+  "CMakeFiles/cmd.dir/jwk/thp.c.o"
+  "CMakeFiles/cmd.dir/jwk/thp.c.o.d"
+  "CMakeFiles/cmd.dir/jwk/use.c.o"
+  "CMakeFiles/cmd.dir/jwk/use.c.o.d"
+  "CMakeFiles/cmd.dir/jws/fmt.c.o"
+  "CMakeFiles/cmd.dir/jws/fmt.c.o.d"
+  "CMakeFiles/cmd.dir/jws/sig.c.o"
+  "CMakeFiles/cmd.dir/jws/sig.c.o.d"
+  "CMakeFiles/cmd.dir/jws/ver.c.o"
+  "CMakeFiles/cmd.dir/jws/ver.c.o.d"
+  "cmd"
+  "cmd.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang C)
+  include(CMakeFiles/cmd.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

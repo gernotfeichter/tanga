@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -52,7 +50,7 @@ class _MyAppState extends State<MyApp> {
                     final displayValue =
                         (value.hasData) ? value.data : 'loading';
                     return Text(
-                      'await "jose --help" exit code = $exitCode (1 is expected)',
+                      'await "jose --help" exit code = $displayValue (1 is expected)',
                       style: textStyle,
                       textAlign: TextAlign.center,
                     );

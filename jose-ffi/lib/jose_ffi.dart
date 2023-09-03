@@ -5,8 +5,8 @@ import 'dart:io' show Directory;
 import 'dart:ffi' as ffi;
 
 Future<int> main(List<String> args) {
-
-  var libraryPath = path.join(Directory.current.path, 'src', 'build', 'cmd', 'libjose.so');
+  var libraryPath =
+      path.join(Directory.current.path, 'src', 'build', 'cmd', 'libjose.so');
 
   final dynlib = ffi.DynamicLibrary.open(libraryPath);
 
@@ -18,13 +18,15 @@ Future<int> main(List<String> args) {
   }).toList();
 
   // Allocate an array of pointers to FFI `ffi.Char` values.
-  final argsCStringArray = malloc.allocate<ffi.Pointer<ffi.Char>>(utf8Ptrs.length);
+  final argsCStringArray =
+      malloc.allocate<ffi.Pointer<ffi.Char>>(utf8Ptrs.length);
 
   // Populate the array with the pointers to the C strings.
   for (var i = 0; i < utf8Ptrs.length; i++) {
     argsCStringArray[i] = utf8Ptrs[i].cast<ffi.Char>();
   }
 
+  final exitCode = nativeLib.main(utf8Ptrs.length, argsCStringArray);
   // Call the C function.
-  return Future.value(nativeLib.main(utf8Ptrs.length, argsCStringArray));
+  return Future.value(exitCode);
 }
