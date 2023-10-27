@@ -69,6 +69,11 @@ openrc default
 7. reboot and hopefully your disk gets unlocked (at least after pressing enter on the plymouth screen without pasword)
 8. You might want to get rid of plymouth to avoid even pressing enter!
 
+# hint
+You seem to be lazy and prefer not to type passwords.
+Therefore, you might also be intersted in a similar solution for the PAM system:
+https://github.com/gernotfeichter/alp
+
 # why such a hacky solution
 1. Initially I wanted to re-implement this in dart, but I saw that a lot of effort would need to be invested for software that already exists and works fine, but only on linux and not on android.
 2. The next best though was: use dart ffi to port the C code to dart (which runs on android), here I faced two main obstacles
