@@ -5,9 +5,6 @@ Guide to show the steps required to use NBDE (network bound disk encryption) to 
 
 > This guide is written for a Fedora linux machine. To use it on distributions systems, you will need to translate package manger/initial ram disk commands etc. to your target linux distribution! It will NOT be easy for the non-tech-affine, but it should be technically possible to run it on any linux distribution!
 
-> Warning: This is an early draft. Main pain points:
-> - after reboot of android, the Userland app needs to be re-opened manually AND
-> the tang command needs to be started
 # setup
 
 ## android
@@ -31,10 +28,6 @@ vi /etc/init.d/tang
 change the line containing tang_address to look like:
 ```
 : ${tang_address:="0.0.0.0"}
-```
-change the line containing command_user to
-```
-command_user="root:root"
 ```
 
 mkdir /etc/bash
@@ -76,10 +69,23 @@ openrc default
 7. reboot and hopefully your disk gets unlocked (at least after pressing enter on the plymouth screen without pasword)
 8. You might want to get rid of plymouth to avoid even pressing enter!
 
+# why such a hacky solution
+1. Initially I wanted to re-implement this in dart, but I saw that a lot of effort would need to be invested for software that already exists and works fine, but only on linux and not on android.
+2. The next best though was: use dart ffi to port the C code to dart (which runs on android), here I faced two main obstacles
+   - Tang has some non-small dependencies like the openssl project.
+   - The dependencies normally do not use CmakeLists, which dart ffi requires. I gave up migrating openssl to CmakeLists after not working quickly.
+   - Using compiled versions (instead of source versions) as dependencies also did not work, because for example those are compiled agains libc (linux) and android seems to use its own libc variant that is incompatible.
+3. While a little bit hacky, the solution runs in a fully automated way once set up. Furthermore, the approach allows porting other/similar linux applications to android without altering them, which is awesome by itself.
+
+# outlook
+Setting up those clevis pins is not extremely trivial.
+Eventually I consider creating a linux destribution that has the base setup already installed. Most likely that will be a small spin-off/add-on from/for some existing distro, will see what comes out and if I find enough motivation.
+
 # tribute
 to the main inventors/maintainers of most of the awesomeness that we make use of here:
-- Nathaniel McCallum and Red Hat https://github.com/npmccallum for the NBDE part.
-- Clemens Fruhwirth https://clemens.endorphin.org/p/about-me.html for the LUKS part.
-- Michał Polański (maintainer of tang package in alpine test repo)
+- [Nathaniel McCallum](https://github.com/npmccallum) and Red Hat for the NBDE part.
+- [Clemens Fruhwirth](https://clemens.endorphin.org/p/about-me.html) for the LUKS part.
+- Corbin Champion(https://github.com/corbinlc) for the UserLand app.
+- Michał Polański for maintaining the tang package in the alpine test repo.
 
 Open source is a big community, for sure I forgot many other important people that are worth mentioning, just raise an issue!
