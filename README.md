@@ -11,31 +11,46 @@ Guide to show the steps required to use NBDE (network bound disk encryption) to 
 # setup
 
 ## android
-(very short draft)
-1. Install https://play.google.com/store/apps/details?id=tech.ula&hl=en_US&pli=1
-2. Start the distribution of your choice.
-3. Connect via ssh, e.g.: `sh root@10.0.0.3 -p 2022`
-4. Install tang.\
-   If it does not work via the package manager, compile from source:
-   https://github.com/latchset/tang
-5. Since we cannot run stuff via systemd, we need to manually initialize keys, e.g.:
-   ```
-   mkdir -p /var/db/tang
-   sudo jose jwk gen -i '{"alg":"ES512"}' -o /var/db/tang/newsig.jwk
-   sudo jose jwk gen -i '{"alg":"ECMR"}' -o /var/db/tang/newexc.jwk
-   ```
-6. Start tang:
-   ```
-   /usr/lib/tangd --port 1080 --listen /var/db/tang
-   ```
-   > for my self-compiled version, it was /usr/libexec/tangd --port 1080 --listen /var/db/tang
-   > the port must be above 1000 due to android restrictions!
+1. download and install the Userland app from Google play store.
+2. Launch an alpine session
+3. Change the root user password: `sudo passwd root`
+4. From your pc start an ssh session
+Exchange Pixel-5 by the hostname or ip of your android phone!
+```
+ssh root@Pixel-5 -p 2022
+```
+Then install openrc and tang and enable tang to be started with the default target (and cahnge to the default target)
+```
+apk add openrc
+
+apk add tang --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
+
+rc-update add tang default
+
+vi /etc/init.d/tang
+change the line containing tang_address to look like:
+```
+: ${tang_address:="0.0.0.0"}
+```
+change the line containing command_user to
+```
+command_user="root:root"
+```
+
+mkdir /etc/bash
+vi /etc/bash/bashrc
+file should contain (workaround since openrc seems to not be able to properly restart services - at least in this environment)
+```
+sudo service tang restart
+```
+openrc default
+```
 
 ## linux
 1. Fill out the variables (change to your android IP) at the beginning of the script, then run the code:
    > If your android phone is the hotspot of your linux machine and the linux machine has the systemd service systemd-resolve (run `systemctl status systemd-resolved` to check), you may replace the IP address with the string _gatway!
    ```
-   TANG_URL="http://10.0.0.3:1080"
+   TANG_URL="http://Pixel-5:7500"
    ./test/encrypt-decrypt.sh "${TANG_URL}"
    ```
    Should print TEST SUCCESS!\
@@ -58,12 +73,13 @@ Guide to show the steps required to use NBDE (network bound disk encryption) to 
    > NOTE: While I mentioned WIFI in the intro, my linux machine needs to be connected via cable, since dracut seems to not support WIFI!
    > Luckily, at least the android phone can be on WIFI (on the same network/router).
    > Still, I'm looking forward to try other initrd management systems than dracut to get rid of this limitation!
-7. reboot and hopefully your disk gets unlocked (at least after pressing enter on the plyouth screen without pasword)
+7. reboot and hopefully your disk gets unlocked (at least after pressing enter on the plymouth screen without pasword)
 8. You might want to get rid of plymouth to avoid even pressing enter!
 
 # tribute
 to the main inventors/maintainers of most of the awesomeness that we make use of here:
-- Nathaniel McCallum https://github.com/npmccallum for the NBDE part.
+- Nathaniel McCallum and Red Hat https://github.com/npmccallum for the NBDE part.
 - Clemens Fruhwirth https://clemens.endorphin.org/p/about-me.html for the LUKS part.
+- Michał Polański (maintainer of tang package in alpine test repo)
 
-Open source is a big community, for sure I forgot many other important people, just raise an issue!
+Open source is a big community, for sure I forgot many other important people that are worth mentioning, just raise an issue!
