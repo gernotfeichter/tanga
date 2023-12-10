@@ -90,7 +90,7 @@ Eventually I consider creating a linux destribution that has the base setup alre
 to the main inventors/maintainers of most of the awesomeness that we make use of here:
 - [Nathaniel McCallum](https://github.com/npmccallum) and Red Hat for the NBDE part.
 - [Clemens Fruhwirth](https://clemens.endorphin.org/p/about-me.html) for the LUKS part.
-- Corbin Champion(https://github.com/corbinlc) for the UserLand app.
+- [Corbin Champion](https://github.com/corbinlc) for the UserLand app.
 - Michał Polański for maintaining the tang package in the alpine test repo.
 
 Open source is a big community, for sure I forgot many other important people that are worth mentioning, just raise an issue!
