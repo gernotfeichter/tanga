@@ -97,6 +97,7 @@ to the main inventors/maintainers of most of the awesomeness that we make use of
 - [Nathaniel McCallum](https://github.com/npmccallum) and Red Hat for the NBDE part.
 - [Clemens Fruhwirth](https://clemens.endorphin.org/p/about-me.html) for the LUKS part.
 - [Corbin Champion](https://github.com/corbinlc) for the UserLand app.
+- [Julien Malka](https://github.com/JulienMalka) and [Camille Mondon](https://github.com/camillemndn) for implementing clevis/tang in NixOS.
 - Michał Polański for maintaining the tang package in the alpine test repo.
 
 Open source is a big community, for sure I forgot many other important people that are worth mentioning, just raise an issue!
