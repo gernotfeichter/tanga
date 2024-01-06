@@ -25,6 +25,7 @@ apk add tang --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
 rc-update add tang default
 
 vi /etc/init.d/tang
+```
 change the line containing tang_address to look like:
 ```
 : ${tang_address:="0.0.0.0"}
