@@ -30,13 +30,19 @@ change the line containing tang_address to look like:
 ```
 : ${tang_address:="0.0.0.0"}
 ```
-
+then proceed with:
+```
 mkdir /etc/bash
 vi /etc/bash/bashrc
-file should contain (workaround since openrc seems to not be able to properly restart services - at least in this environment)
+```
+That file (`/etc/bash/bashrc`) should contain (workaround since openrc seems to not be able to properly restart services - at least in this environment)
 ```
 sudo service tang restart
-openrc default
+
+# The latter lines are only reuired if you do not want to keep tang running forever, I want it to stop after two minutes (120 seconds) automatically.
+sleep 120
+sudo service tang stop    
+exit
 ```
 
 ## linux
