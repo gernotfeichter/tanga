@@ -36,7 +36,6 @@ vi /etc/bash/bashrc
 file should contain (workaround since openrc seems to not be able to properly restart services - at least in this environment)
 ```
 sudo service tang restart
-```
 openrc default
 ```
 
