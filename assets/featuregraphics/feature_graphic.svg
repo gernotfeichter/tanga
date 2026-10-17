@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A4C639"/>
+      <stop offset="1" stop-color="#6E9421"/>
+    </linearGradient>
+    <mask id="robotMask">
+      <rect x="0" y="0" width="512" height="512" fill="black"/>
+      <g fill="white">
+        <path d="M168 208 A88 88 0 0 1 344 208 Z"/>
+        <rect x="126" y="250" width="36" height="120" rx="18"/>
+        <rect x="350" y="250" width="36" height="120" rx="18"/>
+        <rect x="158" y="228" width="196" height="170" rx="26"/>
+        <rect x="188" y="384" width="40" height="66" rx="20"/>
+        <rect x="284" y="384" width="40" height="66" rx="20"/>
+      </g>
+      <g stroke="white" stroke-width="12" stroke-linecap="round" fill="none">
+        <line x1="196" y1="140" x2="168" y2="106"/>
+        <line x1="316" y1="140" x2="344" y2="106"/>
+      </g>
+      <g fill="black">
+        <circle cx="224" cy="176" r="10"/>
+        <circle cx="288" cy="176" r="10"/>
+        <rect x="226" y="306" width="60" height="58" rx="9"/>
+      </g>
+      <path d="M238 308 V294 A18 18 0 0 1 274 294 V308" fill="none" stroke="black" stroke-width="12" stroke-linecap="round"/>
+    </mask>
+  </defs>
+
+  <rect x="0" y="0" width="1024" height="500" fill="url(#bg)"/>
+
+  <rect x="70" y="70" width="360" height="360" rx="56" fill="#ffffff"/>
+  <g transform="translate(95,80) scale(0.62)">
+    <g mask="url(#robotMask)">
+      <rect x="0" y="0" width="512" height="512" fill="#A4C639"/>
+    </g>
+  </g>
+
+  <text x="492" y="255" font-family="DejaVu Sans" font-size="130" font-weight="bold" fill="#ffffff">Tanga</text>
+  <text x="497" y="325" font-family="DejaVu Sans" font-size="42" fill="#ffffff" opacity="0.92">Tang server for Android</text>
+</svg>
