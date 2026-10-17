@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'tang/key_store.dart';
 import 'tang/server.dart';
 
 const int defaultPort = 7500;
@@ -120,7 +121,7 @@ class _TangHomePageState extends State<TangHomePage> {
     });
     await _saveSettings(port, timeout);
     try {
-      final server = TangServer.generate();
+      final server = await const TangKeyStore().loadOrCreate();
       await server.start(port: port);
       final addresses = await _localAddresses();
       if (!mounted) {
