@@ -1,103 +1,83 @@
 # tanga
-> tanga=tang server on android; use android to unlock a LUKS encrypted disk of a linux machine
+> tanga = tang server on android; use your android device to unlock a LUKS encrypted disk of a linux machine
 
-Guide to show the steps required to use NBDE (network bound disk encryption) to **automatically unlock** a **LUKS** encrypted partition, for example when an android device is on the same (WIFI) network as a linux machine.
+A [Tang](https://github.com/latchset/tang) server that runs **natively on Android**.
+The Tang/NBDE protocol is implemented in Dart (with Flutter), so you can use your phone
+to **automatically unlock** a **LUKS** encrypted partition when it is on the same
+(WIFI) network as your linux machine.
 
-> This guide is written for a Fedora linux machine. To use it on distributions systems, you will need to translate package manger/initial ram disk commands etc. to your target linux distribution! It will NOT be easy for the non-tech-affine, but it should be technically possible to run it on any linux distribution!
+While developed with good intentions, use it at your own risk!
+
+# features
+- Runs the Tang server directly on Android — no root, no container, no UserLand/Alpine.
+- Standard Tang endpoints: `GET /adv`, `GET /adv/{kid}` and `POST /rec/{kid}`.
+- Elliptic-curve keys (NIST P-521) are generated on first launch and persisted locally.
+  Signing (`ES512`) and key-exchange (`ECMR`) keys never leave the device; the `kid` is the RFC 7638 thumbprint.
+- Configurable **port** (default `7500`).
+- **Auto-start** the server when the app launches.
+- **Auto-stop** after a configurable number of minutes (`0` = never stop / forever).
+- Shows the reachable URL(s) and a ready-to-paste `clevis luks bind ...` command.
 
 # setup
 
 ## android
-1. download and install the Userland app from Google play store.
-2. Launch an alpine session
-3. Change the root user password: `sudo passwd root`
-4. From your pc start an ssh session
-Exchange Pixel-5 by the hostname or ip of your android phone!
-```
-ssh root@Pixel-5 -p 2022
-```
-Then install openrc and tang and enable tang to be started with the default target (and cahnge to the default target)
-```
-apk add openrc
+1. Install the **tanga** app on your android device — from the Google Play Store, or build it yourself (see [build from source](#build-from-source)).
+2. Launch the app. The Tang server starts automatically on port `7500` and (by default) stops itself again after 2 minutes.
+3. Optionally adjust **Port** and **Auto-stop after (minutes)** in the settings card (`0` = never stop).
+4. The app shows the local address(es) of the running server and the exact command to bind a LUKS volume on the linux machine.
 
-apk add tang --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
-
-rc-update add tang default
-
-vi /etc/init.d/tang
-```
-change the line containing tang_address to look like:
-```
-: ${tang_address:="0.0.0.0"}
-```
-then proceed with:
-```
-mkdir /etc/bash
-vi /etc/bash/bashrc
-```
-That file (`/etc/bash/bashrc`) should contain (workaround since openrc seems to not be able to properly restart services - at least in this environment)
-```
-sudo service tang restart
-
-# The latter lines are only reuired if you do not want to keep tang running forever, I want it to stop after two minutes (120 seconds) automatically.
-sleep 120
-sudo service tang stop    
-exit
-```
+> Tip: for boot-time unlocking, the server must be reachable when the machine powers on.
+> Either set auto-stop to `0`, or reopen the app shortly before booting (preferred - with auto-stop).
 
 ## linux
-1. Fill out the variables (change to your android IP) at the beginning of the script, then run the code:
-   > If your android phone is the hotspot of your linux machine and the linux machine has the systemd service systemd-resolve (run `systemctl status systemd-resolved` to check), you may replace the IP address with the string _gatway!
-   ```
-   TANG_URL="http://Pixel-5:7500"
-   ./test/encrypt-decrypt.sh "${TANG_URL}"
-   ```
-   Should print TEST SUCCESS!\
-   If this is not the case, fix your tang server first.
-2. Note, the following steps are mostly derived from https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/security_hardening/configuring-automated-unlocking-of-encrypted-volumes-using-policy-based-decryption_security-hardening#configuring-manual-enrollment-of-volumes-using-clevis_configuring-automated-unlocking-of-encrypted-volumes-using-policy-based-decryption.
-3. install the clevis-luks package:
-   `yum install clevis-luks`
-4. note your disk, e.g. run `lsblk` and search for the string luks, then see the parent item (partition), for me it is `sda6`!
-5. add tang server as another option (in addition to your existing passphrase) to unlock your LUKS partition:
-   ```
-   sudo clevis luks bind -d /dev/sda6 tang "{\"url\":\"${TANG_URL}\"}"
-   ```
-6. update your initramdisk to include networking and the newly installed clevis pin.
-   ```
-   sudo su
-   dnf install clevis-dracut
-   echo "hostonly_cmdline=yes" > /etc/dracut.conf.d/clevis.conf
-   dracut -fv --regenerate-all
-   ```
-   > NOTE: While I mentioned WIFI in the intro, my linux machine needs to be connected via cable, since dracut seems to not support WIFI!
-   > Luckily, at least the android phone can be on WIFI (on the same network/router).
-   > Still, I'm looking forward to try other initrd management systems than dracut to get rid of this limitation!
-7. reboot and hopefully your disk gets unlocked (at least after pressing enter on the plymouth screen without pasword)
-8. You might want to get rid of plymouth to avoid even pressing enter!
 
-# hint
+> This guide is written for the [hypnix](https://github.com/gernotfeichter/hypnix) linux distro.
+> Use an AI tool to translate the steps to your other distro of choice!
+
+Follow the [Clevis LUKS decryption guide](https://github.com/gernotfeichter/hypnix/blob/master/pills/2-clevis-luks-decryption.md) to bind your LUKS volumes to the tanga server.
+
+# build from source
+Prerequisites: Flutter (Dart 3) and the Android SDK.
+
+```
+# get dependencies
+flutter pub get
+
+# run on a specific connected device or emulator by also adding the -d "<device-name>",
+# where device names can be listed with the command `flutter devices`
+flutter run
+
+# release builds
+flutter build appbundle  # produces build/app/outputs/bundle/release/app-release.aab
+```
+
+## tests
+```
+flutter test            # unit & widget tests
+./test/encrypt-decrypt.sh "${TANG_URL}"   # end-to-end interop test against clevis
+```
+
+# how it works
+`tanga` now implements the Tang HTTP API directly in Dart:
+- Advertisement (`GET /adv`) is served as a JWS (`application/jose+json`) signed with `ES512`; `GET /adv/{kid}` re-signs with the requested key, matching tang's `find_jws()`.
+- Key exchange (`POST /rec/{kid}`) performs an `ECMR` (elliptic-curve key exchange) between the client JWK and the server's exchange key and returns the derived point as a JWK (`application/jwk+json`).
+- Cryptography uses [pointycastle](https://pub.dev/packages/pointycastle); keys are P-521 and identified by their RFC 7638 thumbprint.
+
+# hints
 You seem to be lazy and prefer not to type passwords.
-Therefore, you might also be intersted in a similar solution for the PAM system:
-https://github.com/gernotfeichter/alp
-
-# why such a hacky solution
-1. Initially I wanted to re-implement this in dart, but I saw that a lot of effort would need to be invested for software that already exists and works fine, but only on linux and not on android.
-2. The next best though was: use dart ffi to port the C code to dart (which runs on android), here I faced two main obstacles
-   - Tang has some non-small dependencies like the openssl project.
-   - The dependencies normally do not use CmakeLists, which dart ffi requires. I gave up migrating openssl to CmakeLists after not working quickly.
-   - Using compiled versions (instead of source versions) as dependencies also did not work, because for example those are compiled agains libc (linux) and android seems to use its own libc variant that is incompatible.
-3. While a little bit hacky, the solution runs in a fully automated way once set up. Furthermore, the approach allows porting other/similar linux applications to android without altering them, which is awesome by itself.
-
-# outlook
-Setting up those clevis pins is not extremely trivial.
-Eventually I consider creating a linux destribution that has the base setup already installed. Most likely that will be a small spin-off/add-on from/for some existing distro, will see what comes out and if I find enough motivation.
+Therefore, you might also be interested in a similar solution for the PAM system:
+https://github.com/gernotfeichter/alp, this is also part of the hypnix distro:
+https://github.com/gernotfeichter/hypnix/blob/master/pills/1-android-linux-pam.md
 
 # tribute
-to the main inventors/maintainers of most of the awesomeness that we make use of here:
+...to the main inventors/maintainers of most of the awesomeness that we make use of here:
 - [Nathaniel McCallum](https://github.com/npmccallum) and Red Hat for the NBDE part.
 - [Clemens Fruhwirth](https://clemens.endorphin.org/p/about-me.html) for the LUKS part.
-- [Corbin Champion](https://github.com/corbinlc) for the UserLand app.
+- [Corbin Champion](https://github.com/corbinlc) for the UserLand app (this was used in the intial tanga version - git tag 1.0.0).
 - [Julien Malka](https://github.com/JulienMalka) and [Camille Mondon](https://github.com/camillemndn) for implementing clevis/tang in NixOS.
-- Michał Polański for maintaining the tang package in the alpine test repo.
+- Michał Polański for maintaining the tang package in the alpine test repo. (this was used in the intial tanga version - git tag 1.0.0).
 
 Open source is a big community, for sure I forgot many other important people that are worth mentioning, just raise an issue!
+
+# license
+[GPL-2.0](LICENSE)
