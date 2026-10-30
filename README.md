@@ -22,9 +22,10 @@ While developed with good intentions, use it at your own risk!
 
 ## android
 1. Install the **tanga** app on your android device — from the Google Play Store, or build it yourself (see [build from source](#build-from-source)).
-2. Launch the app. The Tang server starts automatically on port `7500` and (by default) stops itself again after 2 minutes.
-3. Optionally adjust **Port** and **Auto-stop after (minutes)** in the settings card (`0` = never stop).
-4. The app shows the local address(es) of the running server and the exact command to bind a LUKS volume on the linux machine.
+2. Launch the app. On Android 17 or newer, allow the **Nearby devices** permission when asked. Tanga needs it so your Linux machine can reach the tang server on your phone. If you denied it, enable it later under *Settings > Apps > Tanga > Permissions > Nearby devices*.
+3. The Tang server starts automatically on port `7500` and (by default) stops itself again after 2 minutes.
+4. Optionally adjust **Port** and **Auto-stop after (minutes)** in the settings card (`0` = never stop).
+5. The app shows the local address(es) of the running server and the exact command to bind a LUKS volume on the linux machine.
 
 > Tip: for boot-time unlocking, the server must be reachable when the machine powers on.
 > Either set auto-stop to `0`, or reopen the app shortly before booting (preferred - with auto-stop).

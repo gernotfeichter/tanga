@@ -42,6 +42,12 @@ Tanga requires the `INTERNET` permission solely to:
 - read the device's local IP addresses so the app can display the address other
   machines should use.
 
+On Android 17 (API 37) and newer, tanga additionally requests the
+`ACCESS_LOCAL_NETWORK` permission (part of Android's **Nearby devices**
+permission group). This is required by Android so the Linux machine can connect
+to the tang server running on your device. It is used only for that local
+client/server traffic; tanga does not scan, discover, or contact other devices.
+
 The app itself does **not** contact any server on the internet. All traffic is
 between your Android device and other devices you choose to connect on the same
 local network. Nothing is sent to the developer or to any third party.

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'permissions/local_network.dart';
 import 'tang/key_store.dart';
 import 'tang/server.dart';
 
@@ -57,6 +58,7 @@ class _TangHomePageState extends State<TangHomePage> {
 
   TangServer? _server;
   bool _busy = true;
+  bool _localNetworkDenied = false;
   String _status = 'starting...';
   List<String> _addresses = const [];
 
@@ -117,9 +119,21 @@ class _TangHomePageState extends State<TangHomePage> {
     final timeout = _timeoutMinutes;
     setState(() {
       _busy = true;
+      _localNetworkDenied = false;
       _status = 'starting...';
     });
     await _saveSettings(port, timeout);
+
+    if (!await requestLocalNetworkPermission()) {
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _localNetworkDenied = true;
+        _status = 'local network access denied';
+      });
+      return;
+    }
+
     try {
       final server = await const TangKeyStore().loadOrCreate();
       await server.start(port: port);
@@ -142,6 +156,10 @@ class _TangHomePageState extends State<TangHomePage> {
         _busy = false;
       });
     }
+  }
+
+  Future<void> _openLocalNetworkSettings() async {
+    await openLocalNetworkSettings();
   }
 
   Future<void> _stop() async {
@@ -252,6 +270,10 @@ class _TangHomePageState extends State<TangHomePage> {
             const SizedBox(height: 24),
             _settingsCard(context, enabled: !running && !_busy),
             const SizedBox(height: 24),
+            if (_localNetworkDenied) ...[
+              _localNetworkPermissionCard(context),
+              const SizedBox(height: 24),
+            ],
             if (running) ..._runningDetails(context),
             const SizedBox(height: 24),
             running
@@ -301,6 +323,46 @@ class _TangHomePageState extends State<TangHomePage> {
                 helperText: '0 = never stop (forever)',
                 border: OutlineInputBorder(),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _localNetworkPermissionCard(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Local network access required',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Android 17 and newer only allow tanga to receive disk-unlock '
+              'requests from your local network after you grant the '
+              '"Nearby devices" permission. Without it, your Linux machine '
+              'cannot reach the tang server on this device.',
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.icon(
+                  onPressed: _busy ? null : _start,
+                  icon: const Icon(Icons.lan),
+                  label: const Text('Allow access'),
+                ),
+                TextButton(
+                  onPressed: _busy ? null : _openLocalNetworkSettings,
+                  child: const Text('Open app settings'),
+                ),
+              ],
             ),
           ],
         ),
