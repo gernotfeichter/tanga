@@ -17,6 +17,8 @@ While developed with good intentions, use it at your own risk!
 - **Auto-start** the server when the app launches.
 - **Auto-stop** after a configurable number of minutes (`0` = never stop / forever).
 - Shows the reachable URL(s) and a ready-to-paste `clevis luks bind ...` command.
+- Shows the signing key thumbprints (SHA-256/`S256` and SHA-1/`S1`) with copy buttons,
+  plus the exchange key thumbprints, so they can be compared out of band before binding.
 
 # setup
 
@@ -25,6 +27,7 @@ While developed with good intentions, use it at your own risk!
 2. Launch the app. The Tang server starts automatically on port `7500` and (by default) stops itself again after 2 minutes.
 3. Optionally adjust **Port** and **Auto-stop after (minutes)** in the settings card (`0` = never stop).
 4. The app shows the local address(es) of the running server and the exact command to bind a LUKS volume on the linux machine.
+5. Compare the displayed signing key thumbprint with an out-of-band source (on a regular Tang server: `tang-show-keys <port>`) before trusting it. To pin the key during binding, add `"thp":"<S256 thumbprint>"` to the `tang` config in the command; Clevis also accepts the shown S1 thumbprint.
 
 > Tip: for boot-time unlocking, the server must be reachable when the machine powers on.
 > Either set auto-stop to `0`, or reopen the app shortly before booting (preferred - with auto-stop).

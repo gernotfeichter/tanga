@@ -75,11 +75,25 @@ class _TangHomePageState extends State<TangHomePage> {
     if (widget.autoStart) {
       await _start();
     } else {
+      await _loadKeys();
       if (!mounted) return;
       setState(() {
         _busy = false;
         _status = 'stopped';
       });
+    }
+  }
+
+  /// Keys are loaded independently of the server so their thumbprints can be
+  /// inspected (and compared out of band) while the server is stopped too.
+  Future<void> _loadKeys() async {
+    if (_server != null) return;
+    try {
+      final server = await const TangKeyStore().loadOrCreate();
+      if (!mounted) return;
+      setState(() => _server = server);
+    } catch (_) {
+      // Thumbprints are unavailable until the keys can be loaded.
     }
   }
 
@@ -121,7 +135,16 @@ class _TangHomePageState extends State<TangHomePage> {
     });
     await _saveSettings(port, timeout);
     try {
-      final server = await const TangKeyStore().loadOrCreate();
+      await _loadKeys();
+      final server = _server;
+      if (server == null) {
+        if (!mounted) return;
+        setState(() {
+          _status = 'failed to load keys';
+          _busy = false;
+        });
+        return;
+      }
       await server.start(port: port);
       final addresses = await _localAddresses();
       if (!mounted) {
@@ -129,7 +152,6 @@ class _TangHomePageState extends State<TangHomePage> {
         return;
       }
       setState(() {
-        _server = server;
         _addresses = addresses;
         _status = 'running';
         _busy = false;
@@ -160,7 +182,6 @@ class _TangHomePageState extends State<TangHomePage> {
       _busy = true;
       _status = 'stopping...';
     });
-    _server = null;
     await server.stop();
     if (!mounted) return;
     setState(() {
@@ -251,8 +272,10 @@ class _TangHomePageState extends State<TangHomePage> {
             ],
             const SizedBox(height: 24),
             _settingsCard(context, enabled: !running && !_busy),
-            const SizedBox(height: 24),
-            if (running) ..._runningDetails(context),
+            if (running) ...[
+              const SizedBox(height: 24),
+              ..._runningDetails(context),
+            ],
             const SizedBox(height: 24),
             running
                 ? FilledButton.icon(
@@ -265,6 +288,10 @@ class _TangHomePageState extends State<TangHomePage> {
                     icon: const Icon(Icons.play_arrow),
                     label: const Text('Start tang server'),
                   ),
+            if (_server != null) ...[
+              const SizedBox(height: 24),
+              _thumbprintsCard(context),
+            ],
           ],
         ),
       ),
@@ -310,19 +337,6 @@ class _TangHomePageState extends State<TangHomePage> {
 
   List<Widget> _runningDetails(BuildContext context) {
     final port = _server?.port ?? _port;
-    if (_addresses.isEmpty) {
-      return [
-        Center(
-          child: Text(
-            'port: $port',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Center(child: Text('no network address found')),
-      ];
-    }
-    final example = _addresses.first;
     return [
       Center(
         child: Text(
@@ -331,20 +345,114 @@ class _TangHomePageState extends State<TangHomePage> {
         ),
       ),
       const SizedBox(height: 8),
-      for (final address in _addresses)
-        Center(
-          child: Text(
-            'http://$address:$port',
-            style: Theme.of(context).textTheme.bodyMedium,
+      if (_addresses.isEmpty)
+        const Center(child: Text('no network address found'))
+      else ...[
+        for (final address in _addresses)
+          Center(
+            child: Text(
+              'http://$address:$port',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
+        const SizedBox(height: 8),
+        Text(
+          'Bind a LUKS volume with:\n'
+          'clevis luks bind -d <dev> tang '
+          '{"url":"http://${_addresses.first}:$port"}',
+          textAlign: TextAlign.center,
         ),
-      const SizedBox(height: 8),
-      Text(
-        'Bind a LUKS volume with:\n'
-        'clevis luks bind -d <dev> tang '
-        '{"url":"http://$example:$port"}',
-        textAlign: TextAlign.center,
-      ),
+      ],
     ];
+  }
+
+  Widget _thumbprintsCard(BuildContext context) {
+    final server = _server;
+    if (server == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('key thumbprints', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(
+              'Compare the signing key thumbprints with an out-of-band source '
+              'before binding. Clevis accepts either form as thp; the S256 '
+              'value is the kid.',
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            for (final key in server.signingKeys) ...[
+              _ThumbprintRow(
+                label: 'Signing key (ES512) - SHA-256 / S256 (kid)',
+                value: key.thumbprintS256(),
+              ),
+              _ThumbprintRow(
+                label: 'Signing key (ES512) - SHA-1 / S1',
+                value: key.thumbprintS1(),
+              ),
+            ],
+            if (server.exchangeKeys.isNotEmpty) ...[
+              const Divider(height: 24),
+              for (final key in server.exchangeKeys) ...[
+                _ThumbprintRow(
+                  label: 'Exchange key (ECMR) - SHA-256 / S256 (kid)',
+                  value: key.thumbprintS256(),
+                ),
+                _ThumbprintRow(
+                  label: 'Exchange key (ECMR) - SHA-1 / S1',
+                  value: key.thumbprintS1(),
+                ),
+              ],
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ThumbprintRow extends StatelessWidget {
+  const _ThumbprintRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 2),
+                SelectableText(
+                  value,
+                  style: const TextStyle(fontFamily: 'monospace'),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: 'Copy $label',
+            icon: const Icon(Icons.copy),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: value));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Copied $label')),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

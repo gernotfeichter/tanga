@@ -109,13 +109,19 @@ class TangEcKey {
     return lhs.toBigInteger() == rhs.toBigInteger();
   }
 
-  /// RFC 7638 JWK thumbprint using SHA-256 (jose's default `S256`).
-  String thumbprintS256() {
+  /// RFC 7638 JWK thumbprint using SHA-256 (jose's `S256`, the `kid` used by
+  /// tang and the default for clevis' `thp`).
+  String thumbprintS256() => _thumbprint(SHA256Digest());
+
+  /// RFC 7638 JWK thumbprint using SHA-1 (jose's `S1`). Older tang tooling and
+  /// many clevis guides use this shorter form, and clevis accepts it as `thp`.
+  String thumbprintS1() => _thumbprint(SHA1Digest());
+
+  String _thumbprint(Digest digest) {
     final jwk = publicJwk(includeAlg: false, includeKeyOps: false);
     final canonical =
         '{"crv":"${jwk['crv']}","kty":"${jwk['kty']}",'
         '"x":"${jwk['x']}","y":"${jwk['y']}"}';
-    final digest = SHA256Digest();
     final hash = digest.process(Uint8List.fromList(canonical.codeUnits));
     return b64urlEncode(hash);
   }
