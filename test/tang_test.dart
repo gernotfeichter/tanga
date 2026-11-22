@@ -37,6 +37,8 @@ const _joseExchangeKeyJwk = {
       'AWLe2s6dGKpYyaWrIkCPhm-cc4Yny9kTpbNAswltxC5koZwkHYYsMQEarLevFPaqrIzWo59qnDvyBBXtvSkSkosh',
 };
 
+const _joseSigningKid = 'Nnhq4OTVrxhQuxRBGZnv8fUaWe2uUki7iqYvhUUzdRk';
+const _joseSigningS1Thumbprint = 'Mr66UM8CSjICK0dDhJZGsoJo8GA';
 const _joseExchangeKid = '5yMvrFEpUi66MHsBiX2ywcfRoDsvLUEdADeq9cdM4nk';
 
 // `jose jws sig -s '{"protected":{"cty":"jwk-set+json"}}' -k sig.jwk -I -`
@@ -53,6 +55,12 @@ void main() {
     test('computes the same S256 thumbprint as jose', () {
       final key = TangEcKey.fromJwk(_joseExchangeKeyJwk);
       expect(key.thumbprintS256(), _joseExchangeKid);
+    });
+
+    test('computes both S256 and S1 thumbprints of the signing key', () {
+      final key = TangEcKey.fromJwk(_joseSigningKeyJwk);
+      expect(key.thumbprintS256(), _joseSigningKid);
+      expect(key.thumbprintS1(), _joseSigningS1Thumbprint);
     });
 
     test('verifies the advertisement signed by jose', () {
